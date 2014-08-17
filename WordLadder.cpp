@@ -12,14 +12,54 @@
 #include <iostream>
 
 /*
- * Takes in a word and returns a vector of strings/words 
- * that are one letter apart.
+ * Takes in a word and its history of other 
+ * words it came from. Returns a vector of 
+ * new strings/words that are one letter apart.
  */
-vector<string> findNextWords(const string& aWord) {
+vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const vector<string>& aHistory) {
 
-	vector<string> temp;
+	// Set constants.
+	const int ASCII_A = 97;
+	const int ASCII_Z = 122;
 
-	return temp;
+	// Create result list to be returned.
+	vector<string> wordList;
+
+	// For each letter position in the word.
+	for(size_t i=0;i<aWord.length();i++)
+	{
+		// Cycle through another letter
+		for(int j=ASCII_A;j<=ASCII_Z;j++)
+		{
+			// Check old letter is not same as new letter.
+			if(aWord[i] != j)
+			{
+				string temp(aWord);
+				temp[i] = (char) j;
+
+				// Check that word has not been traversed before.
+				int found = 0;
+				for(auto start = aHistory.begin();start != aHistory.end();start++)
+				{
+					if( (*start) == temp)
+					{	
+						// Word has been traversed before.
+						found = 1;
+						break;
+					}
+				}
+
+				// Check that the result is a word which has not been traversed.
+				if(aLexicon.containsWord(temp) && !found)
+				{
+					// Add to connected word/node list.
+					wordList.push_back(temp);
+				}
+			}
+		}
+	}
+
+	return wordList;
 }
 
 /*
@@ -28,7 +68,7 @@ vector<string> findNextWords(const string& aWord) {
  * word ladder.
  */
 string breadthFirstSearch(const pair<string, vector<string>>& aStartPair, 
-						  const Lexicon& aLexicon, const string& aDestWord) {
+						  Lexicon& aLexicon, const string& aDestWord) {
 
 	return "";
 }
@@ -46,7 +86,7 @@ int main() {
 	cout << "Enter destination word: ";
 
 	cin >> destWord;
-cout << "You read in: (" << startWord << ")(" << destWord << ")" << endl;
+
 	// Create start queue object.
 	vector<string> history;
 	pair<string, vector<string>> startQueuePair(startWord, history);
@@ -57,8 +97,16 @@ cout << "You read in: (" << startWord << ")(" << destWord << ")" << endl;
 	// Perform Breadth first Search.
 	string result = breadthFirstSearch(startQueuePair, myLexicon, destWord);
 
+	vector<string> a;
+	a.push_back("eat");
 
-	
+	vector<string> l(findNextWords(myLexicon, "cat", a));
+
+	for(auto start = l.begin();start != l.end();start++)
+	{
+		cout << (*start) << endl;
+	}	
+
 
 	return 0;
 }
