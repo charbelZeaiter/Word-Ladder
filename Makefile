@@ -5,7 +5,7 @@
 CPPFLAGS = -g -Wall -Werror -O2 -std=c++0x
 
 CXX=g++
-LDFLAGS = 
+LDFLAGS =
 
 # Add your own cpp files below
 CLASS = genlib.cpp lexicon.cpp strutils.cpp

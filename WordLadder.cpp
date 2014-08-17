@@ -10,14 +10,15 @@
 #include <queue>
 #include <vector>
 #include <iostream>
-#include <map>
+#include <unordered_map>
+#include <cstdlib>
 
 /*
  * Takes in a word and its history of other 
  * words it came from. Returns a vector of 
  * new strings/words that are one letter apart.
  */
-vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const map<string, int>& aTotalHistory) {
+vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const unordered_map<string, int>& aTotalHistory) {
 
 	// Set constants.
 	const int ASCII_A = 97;
@@ -31,7 +32,7 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const map<s
 	{
 		// Cycle through another letter
 		for(int j=ASCII_A;j<=ASCII_Z;j++)
-		{
+		{ 
 			// Check old letter is not same as new letter.
 			if(aWord[i] != j)
 			{
@@ -39,7 +40,7 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const map<s
 				temp[i] = (char) j;
 
 				// Check that word has not been traversed before.
-				auto iterator = aTotalHistory.find(temp);
+				auto iterator = aTotalHistory.find(temp); 
 
 				// Check that the result is a word which has not been traversed.
 				if(aLexicon.containsWord(temp) && iterator == aTotalHistory.end())
@@ -72,7 +73,7 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 	myQueue.push(aStartPair);
 
 	// Set up a vector of previously visited words.
-	map<string, int> totalHistory;
+	unordered_map<string, int> totalHistory;
 
 	// Start BFS algorithm.
 	while(!myQueue.empty())
@@ -112,7 +113,7 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 			}
 		}
 		else
-		{
+		{ 
 			// Get list of next words.
 			vector<string> nextWords(findNextWords(aLexicon, myPair.first, totalHistory));
 
@@ -170,8 +171,34 @@ void outputResult(const vector<vector<string>>& aResultSet)
 	else
 	{
 		// Results not found.
-		cout << "No ladder found.";
+		cout << "No ladder found." << endl;
 	}
+}
+
+/*
+ * Performs a quick check of obvious rules
+ * for translation before a BFS is done.
+*/
+bool quickCheck(Lexicon aLexicon, const string aStartWord, const string aDestWord)
+{	
+	bool result = false;
+
+	// Check both word are of sae length.
+	if(aStartWord.length() == aDestWord.length())
+	{	
+		// Check start word exists in lex
+		if(aLexicon.containsWord(aStartWord))
+		{	
+			// Check dest word exists in lex
+			if(aLexicon.containsWord(aDestWord))
+			{	
+				// Initial checks passed. 
+				result = true;
+			}
+		}
+	}
+
+	return result;
 }
 
 int main() {
@@ -188,18 +215,25 @@ int main() {
 
 	cin >> destWord;
 
-	// Create start queue object.
-	vector<string> nodeHistory;
-	pair<string, vector<string>> startQueuePair(startWord, nodeHistory);
-
 	// Initialize lexicon.
 	Lexicon myLexicon("EnglishWords.dat");
 
-	// Perform Breadth first Search.
-	vector<vector<string>> myResultSet = breadthFirstSearch(startQueuePair, myLexicon, destWord);
+	// Declare result set.
+	vector<vector<string>> myResultSet;
+
+	// Quick check for obvious non translations.
+	if(quickCheck(myLexicon, startWord, destWord))
+	{
+		// Create start queue object.
+		vector<string> nodeHistory;
+		pair<string, vector<string>> startQueuePair(startWord, nodeHistory);
+
+		// Perform Breadth first Search.
+		myResultSet = breadthFirstSearch(startQueuePair, myLexicon, destWord);
+	}
 
 	// Output the results.
 	outputResult(myResultSet);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
