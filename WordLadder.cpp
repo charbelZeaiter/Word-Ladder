@@ -10,13 +10,14 @@
 #include <queue>
 #include <vector>
 #include <iostream>
+#include <map>
 
 /*
  * Takes in a word and its history of other 
  * words it came from. Returns a vector of 
  * new strings/words that are one letter apart.
  */
-vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const vector<string>& aHistory) {
+vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const map<string, int>& aTotalHistory) {
 
 	// Set constants.
 	const int ASCII_A = 97;
@@ -38,19 +39,10 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const vecto
 				temp[i] = (char) j;
 
 				// Check that word has not been traversed before.
-				int found = 0;
-				for(auto start = aHistory.begin();start != aHistory.end();start++)
-				{
-					if( (*start) == temp)
-					{	
-						// Word has been traversed before.
-						found = 1;
-						break;
-					}
-				}
+				auto iterator = aTotalHistory.find(temp);
 
 				// Check that the result is a word which has not been traversed.
-				if(aLexicon.containsWord(temp) && !found)
+				if(aLexicon.containsWord(temp) && iterator == aTotalHistory.end())
 				{
 					// Add to connected word/node list.
 					wordList.push_back(temp);
@@ -67,10 +59,119 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const vecto
  * and a destination word. Conducts a BFS to find the
  * word ladder.
  */
-string breadthFirstSearch(const pair<string, vector<string>>& aStartPair, 
-						  Lexicon& aLexicon, const string& aDestWord) {
+vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aStartPair, 
+						  Lexicon& aLexicon, const string& aDestWord) 
+{
+	// Create result variable.
+	vector<vector<string>> myResult;
 
-	return "";
+	// Create queue.
+	queue<pair<string, vector<string>>> myQueue;
+
+	// Enqueue starting pair/node.
+	myQueue.push(aStartPair);
+
+	// Set up a vector of previously visited words.
+	map<string, int> totalHistory;
+
+	// Start BFS algorithm.
+	while(!myQueue.empty())
+	{	
+		// Dequeue first pair.
+		pair<string, vector<string>> myPair = myQueue.front();
+		myQueue.pop();
+
+		// Update history.
+		totalHistory[myPair.first] = 1;
+
+		// Check if destination word is found.
+		if(myPair.first == aDestWord)
+		{
+			// Dest word, put itself on end of its own history.
+			myPair.second.push_back(myPair.first);
+
+			// Check if results exist.
+			if(myResult.size() > 0)
+			{
+				// Check that this result is also optimal.
+				if(myPair.second.size() == myResult[0].size())
+				{
+					// Push ladder onto result vector.
+					myResult.push_back(myPair.second);
+				}
+				else
+				{
+					// No more optimal solutions
+					break;
+				}
+			}
+			else
+			{
+				// Push ladder onto result vector.
+				myResult.push_back(myPair.second);
+			}
+		}
+		else
+		{
+			// Get list of next words.
+			vector<string> nextWords(findNextWords(aLexicon, myPair.first, totalHistory));
+
+			// For each word we prep it and enqueue it.
+			for(auto currentWord = nextWords.begin(); currentWord != nextWords.end();currentWord++)
+			{
+				// Store new word.
+				string newWord( (*currentWord) );
+
+				// Store new word's history using previous word's history.
+				vector<string> nodeHistory(myPair.second);
+				nodeHistory.push_back(myPair.first);
+
+				// Create queue object and enqueue it.
+				pair<string, vector<string>> newPair(newWord, nodeHistory);
+				myQueue.push(newPair);
+			}
+		}
+	}
+
+	return myResult;
+}
+
+/*
+ * A Helper function to output
+ * the gathered results. 
+*/
+void outputResult(const vector<vector<string>>& aResultSet)
+{
+	// Check if results exist.
+	if(aResultSet.size() > 0)
+	{
+		// Exists.
+		cout << "Found ladder: "; 
+
+		// Traverse each word ladder.
+		for(auto entry = aResultSet.rbegin(); entry != aResultSet.rend(); entry++)
+		{	
+			// Traverse each word in word ladder.
+			for(auto word = (*entry).begin(); word != (*entry).end(); word++)
+			{
+				if(word == ((*entry).end()-1) )
+				{
+					cout << (*word); 
+				} 
+				else
+				{
+					cout << (*word) << " "; 
+				}
+			}
+
+			cout << endl;
+		}
+	}
+	else
+	{
+		// Results not found.
+		cout << "No ladder found.";
+	}
 }
 
 int main() {
@@ -88,25 +189,17 @@ int main() {
 	cin >> destWord;
 
 	// Create start queue object.
-	vector<string> history;
-	pair<string, vector<string>> startQueuePair(startWord, history);
+	vector<string> nodeHistory;
+	pair<string, vector<string>> startQueuePair(startWord, nodeHistory);
 
 	// Initialize lexicon.
 	Lexicon myLexicon("EnglishWords.dat");
 
 	// Perform Breadth first Search.
-	string result = breadthFirstSearch(startQueuePair, myLexicon, destWord);
+	vector<vector<string>> myResultSet = breadthFirstSearch(startQueuePair, myLexicon, destWord);
 
-	vector<string> a;
-	a.push_back("eat");
-
-	vector<string> l(findNextWords(myLexicon, "cat", a));
-
-	for(auto start = l.begin();start != l.end();start++)
-	{
-		cout << (*start) << endl;
-	}	
-
+	// Output the results.
+	outputResult(myResultSet);
 
 	return 0;
 }
