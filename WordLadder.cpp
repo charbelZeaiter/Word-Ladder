@@ -1,7 +1,7 @@
 /*
  * File: WordLadder.cpp
  * --------------------
- * Name: [Charbel John Zeaiter]
+ * Name: [Charbel John Zeaiter] / (oliverc@cse.unsw.edu.au)
  * This file is the starter project for the word ladder problem on Assignment #1.
  */
 
@@ -12,6 +12,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <cstdlib>
+#include <algorithm> 
 
 /*
  * Takes in a word and its history of other 
@@ -85,32 +86,20 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 		// Update history.
 		totalHistory[myPair.first] = 1;
 
-		// Check if destination word is found.
+		// All Longer ladders are not considered if a shorter solution is found.
+		if(myResult.size() > 0 && (myResult[0].size()-1) < myPair.second.size() )  
+		{
+			break;
+		}
+
+		// Check case.
 		if(myPair.first == aDestWord)
 		{
 			// Dest word, put itself on end of its own history.
 			myPair.second.push_back(myPair.first);
 
-			// Check if results exist.
-			if(myResult.size() > 0)
-			{
-				// Check that this result is also optimal.
-				if(myPair.second.size() == myResult[0].size())
-				{
-					// Push ladder onto result vector.
-					myResult.push_back(myPair.second);
-				}
-				else
-				{
-					// No more optimal solutions
-					break;
-				}
-			}
-			else
-			{
-				// Push ladder onto result vector.
-				myResult.push_back(myPair.second);
-			}
+			// Push ladder onto result vector.
+			myResult.push_back(myPair.second);
 		}
 		else
 		{ 
@@ -139,33 +128,43 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 
 /*
  * A Helper function to output
- * the gathered results. 
+ * the gathered results in the correct manner. 
 */
 void outputResult(const vector<vector<string>>& aResultSet)
 {
 	// Check if results exist.
 	if(aResultSet.size() > 0)
-	{
+	{	
+		// Create result vector of string ladders.
+		vector<string> myLadders;
+
 		// Exists.
 		cout << "Found ladder: "; 
 
-		// Traverse each word ladder.
-		for(auto entry = aResultSet.rbegin(); entry != aResultSet.rend(); entry++)
+		for(auto wordSet : aResultSet)
 		{	
-			// Traverse each word in word ladder.
-			for(auto word = (*entry).begin(); word != (*entry).end(); word++)
+			// Create ladder varibale.
+			string newLadder;
+
+			for(auto word : wordSet)
 			{
-				if(word == ((*entry).end()-1) )
-				{
-					cout << (*word); 
-				} 
-				else
-				{
-					cout << (*word) << " "; 
-				}
+				newLadder.append(word+" "); 
 			}
 
-			cout << endl;
+			// Remove last space.
+			newLadder.erase(newLadder.length()-1);
+
+			// Add string to vector of string ladders
+			myLadders.push_back(newLadder);
+		}
+
+		// Sort entries.
+		sort(myLadders.begin(), myLadders.end());
+
+		// Print to stdout.
+		for (string entry : myLadders)
+		{
+			cout << entry << endl;
 		}
 	}
 	else
@@ -179,7 +178,7 @@ void outputResult(const vector<vector<string>>& aResultSet)
  * Performs a quick check of obvious rules
  * for translation before a BFS is done.
 */
-bool quickCheck(Lexicon aLexicon, const string aStartWord, const string aDestWord)
+bool quickCheck(Lexicon& aLexicon, const string aStartWord, const string aDestWord)
 {	
 	bool result = false;
 
@@ -210,11 +209,11 @@ int main() {
 
 	string startWord, destWord;
 	cin >> startWord;
-
+	
 	cout << "Enter destination word: ";
 
 	cin >> destWord;
-
+	
 	// Initialize lexicon.
 	Lexicon myLexicon("EnglishWords.dat");
 
