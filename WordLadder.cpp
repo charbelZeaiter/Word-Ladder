@@ -1,7 +1,7 @@
 /*
  * File: WordLadder.cpp
  * --------------------
- * Name: [Charbel John Zeaiter] / (oliverc@cse.unsw.edu.au)
+ * Name: [Charbel John Zeaiter] 
  * This file is the starter project for the word ladder problem on Assignment #1.
  */
 
@@ -10,7 +10,6 @@
 #include <queue>
 #include <vector>
 #include <iostream>
-#include <unordered_map>
 #include <cstdlib>
 #include <algorithm> 
 
@@ -19,7 +18,7 @@
  * words it came from. Returns a vector of 
  * new strings/words that are one letter apart.
  */
-vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const unordered_map<string, int>& aTotalHistory) {
+vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, Lexicon& aTotalHistory) {
 
 	// Set constants.
 	const int ASCII_A = 97;
@@ -40,11 +39,8 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, const unord
 				string temp(aWord);
 				temp[i] = (char) j;
 
-				// Check that word has not been traversed before.
-				auto iterator = aTotalHistory.find(temp); 
-
 				// Check that the result is a word which has not been traversed.
-				if(aLexicon.containsWord(temp) && iterator == aTotalHistory.end())
+				if(aLexicon.containsWord(temp) && !aTotalHistory.containsWord(temp))
 				{
 					// Add to connected word/node list.
 					wordList.push_back(temp);
@@ -74,7 +70,7 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 	myQueue.push(aStartPair);
 
 	// Set up a vector of previously visited words.
-	unordered_map<string, int> totalHistory;
+	Lexicon totalHistory;
 
 	// Start BFS algorithm.
 	while(!myQueue.empty())
@@ -84,7 +80,7 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 		myQueue.pop();
 
 		// Update history.
-		totalHistory[myPair.first] = 1;
+		totalHistory.add(myPair.first);
 
 		// All Longer ladders are not considered if a shorter solution is found.
 		if(myResult.size() > 0 && (myResult[0].size()-1) < myPair.second.size() )  
