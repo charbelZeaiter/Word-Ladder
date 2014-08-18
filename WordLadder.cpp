@@ -11,7 +11,8 @@
 #include <vector>
 #include <iostream>
 #include <cstdlib>
-#include <algorithm> 
+#include <algorithm>
+#include <locale> 
 
 /*
  * Takes in a word and its history of other 
@@ -42,7 +43,7 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, Lexicon& aT
 				// Check that the result is a word which has not been traversed.
 				if(aLexicon.containsWord(temp) && !aTotalHistory.containsWord(temp))
 				{
-					// Add to connected word/node list.
+					// Add to connected word/node list. 
 					wordList.push_back(temp);
 				}
 			}
@@ -103,10 +104,10 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 			vector<string> nextWords(findNextWords(aLexicon, myPair.first, totalHistory));
 
 			// For each word we prep it and enqueue it.
-			for(auto currentWord = nextWords.begin(); currentWord != nextWords.end();currentWord++)
+			for(auto currentWord : nextWords)
 			{
 				// Store new word.
-				string newWord( (*currentWord) );
+				string newWord(currentWord);
 
 				// Store new word's history using previous word's history.
 				vector<string> nodeHistory(myPair.second);
@@ -196,6 +197,21 @@ bool quickCheck(Lexicon& aLexicon, const string aStartWord, const string aDestWo
 	return result;
 }
 
+/*
+ * Converts input string to lowercase.
+*/
+string toLowercase(const string aString)
+{
+	string result(aString);
+	locale loc;
+	for (size_t i=0; i<result.length(); ++i)
+	{
+    	result[i] = tolower(result[i],loc);
+	}
+
+	return result;
+}
+
 int main() {
 
 	// Bootstrap the program //
@@ -210,6 +226,10 @@ int main() {
 
 	cin >> destWord;
 	
+	// Convert to lower case.
+	startWord = toLowercase(startWord);
+	destWord = toLowercase(destWord);
+
 	// Initialize lexicon.
 	Lexicon myLexicon("EnglishWords.dat");
 
