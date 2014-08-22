@@ -109,7 +109,7 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 				// Store new word.
 				string newWord(currentWord);
 
-				// Store new word's history using previous word's history.
+				// Store new word's history using previous word's history via copy.
 				vector<string> nodeHistory(myPair.second);
 				nodeHistory.push_back(myPair.first);
 
