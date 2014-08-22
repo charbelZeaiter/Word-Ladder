@@ -18,3 +18,6 @@ A word ladder is a connection from one word to another formed by changing one le
 
 **=== Internals ===**  
 - Uses a Breadth First Search.
+
+**=== Creation ===**  
+- Month/Year: Aug/2014
