@@ -38,7 +38,7 @@ vector<string> findNextWords(Lexicon& aLexicon, const string& aWord, Lexicon& aT
 			if(aWord[i] != j)
 			{
 				string temp(aWord);
-				temp[i] = (char) j;
+				temp[i] = j;
 
 				// Check that the result is a word which has not been traversed.
 				if(aLexicon.containsWord(temp) && !aTotalHistory.containsWord(temp))
@@ -102,10 +102,10 @@ vector<vector<string>> breadthFirstSearch(const pair<string, vector<string>>& aS
 		{ 
 			// Get list of next words.
 			vector<string> nextWords(findNextWords(aLexicon, myPair.first, totalHistory));
-
+			
 			// For each word we prep it and enqueue it.
 			for(auto currentWord : nextWords)
-			{
+			{	
 				// Store new word.
 				string newWord(currentWord);
 
